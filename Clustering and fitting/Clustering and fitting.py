@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sb
+import matplotlib as mpl
 
 # =============================================================================
 # dataFormation is a class used to extract data from csv file and return data
@@ -39,6 +40,7 @@ class dataFormation:
         # setting the values to drop
         toDrop = ['Country Code', 'Indicator Name', 'Indicator Code']
         dataBank = dataBank.drop(toDrop, axis = 1) # dropping the values
+        # dataBank = dataBank.fillna(0)
         # setting the dataFrame values to a variable(years as columns)
         self.dataYears = dataBank
         # data frame transpose to get years as columns 
@@ -77,7 +79,9 @@ class dataFormation:
         '''
         return self.dataYears
     
+# =============================================================================
 # scatter plot to show the data
+# =============================================================================
 def scatterPlot(xAxis, yAxis, db, cluster, title):
     '''
     this method is used to plot the scatter plot
@@ -100,40 +104,82 @@ def scatterPlot(xAxis, yAxis, db, cluster, title):
     None.
 
     '''
-    print(db['2000'])
     sb.scatterplot(x = db[xAxis],
                    y = db[yAxis], 
-                   # hue = cluster, 
+                   hue = db[2005], 
                    palette = sb.color_palette("hls", as_cmap=True),
                    data = db,
-                   legend="full")
+                   legend = "full")
     plt.xlabel(xAxis, fontsize = 17)
     plt.ylabel(yAxis, fontsize = 17)
     plt.title(title, fontsize = 24)
     
     return
 
-# invoking 
-data_power = dataFormation("Electric power consumption.csv")
+# =============================================================================
+# line plot function
+# =============================================================================
+def linePlot(data, countries, Title):
+    '''
+    this funcion is used to plot the line plot
+
+    Parameters
+    ----------
+    data : dataFrame
+        used to plot the line plot.
+    countries : List
+        Counties is a list which is used to plot the data and set the legend.
+    Title : String
+        a string used as a title for plot.
+
+    Returns
+    -------
+    None.
+
+    '''
+    imageName = Title+" line_Plot.png" # setting the image name
+    data.plot('Year', countries,
+              label= countries, 
+              kind = "line", title = Title)
+    plt.grid() # applying grid for the plot to refere the values
+    plt.title(Title, size = 35) # setting title for plot and its size
+    plt.savefig(imageName) # to save the plots
+    plt.show() # to display the plots
+    
+    return
+
+# setting the font size to default
+mpl.rcParams['font.size'] = 25
+
+# invoking data formation function
+data_ep = dataFormation("Electric power consumption.csv")
+
+# setting the values of countries(interested)
+county_list = ['Denmark', 'Finland',
+               'Israel', 'Greece', 'Switzerland',
+               'United Arab Emirates']
+
+# setting the values of years(interested)
+years_list = ['1995', '2000', '2005', '2010', '2015']
+
+# Invoking line plot
+linePlot(data_ep.data_countries(),
+          county_list, 
+          "Electric power consumption (kWh per capita)")
 
 # scatter plot start
 plt.figure(figsize=(10,6))
 
 # =============================================================================
 # invoking scatter plot method to plot the clusters
-# plotting among change price and change in next week price
 # =============================================================================
-# dataToPass = data_power.data_countries()
+
+dataToPass = data_ep.data_countries()
 
 scatterPlot('2002',
             '2007',
-            # dataToPass,
-            data_power.data_years(),
-            'all_clusters',
-            "Basic K-means clustering without outliers")
+            dataToPass,
+            dataToPass[2005],
+            "Basic K-means")
 
 plt.show()
-
-# print(dataBank)
-
-# print(dataBank_t)
